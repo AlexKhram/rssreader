@@ -1,5 +1,5 @@
 <?php
-ini_set('display_errors',1); //////////////////////////////////////////////////////// change it
+ini_set('display_errors',0);
 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -9,7 +9,7 @@ require_once __DIR__.'/app/config.php';
 
 $app = new Silex\Application();
 
-$app['debug'] = true; //////////////////////////////////////////////////////// change it
+$app['debug'] = false;
 
 // service providers
 $app->register(new Silex\Provider\SessionServiceProvider());
