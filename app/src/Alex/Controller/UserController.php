@@ -16,69 +16,86 @@ class UserController
     public function login(Request $request, Application $app)
     {
         if ($userId = $app['modelUser']->auth()) {
-            echo 'go to rss';
             return $app->redirect('/');
         }
-        if ($request->getMethod() == 'POST') {
-            $email = $request->get('email');
-            $password = $request->get('password');
-            $warning = $app['modelUser']->userDataValidate($email, $password);
-            if (empty($warning)) {
-                $user = $app['modelUser']->getUserByEmail($email);
-                if (!$user) {
-                    $warning[] = 'User with given e-mail not found';
-                } else {
-                    if (!$warning[] = $app['modelUser']->checkPassword($user, $password)) {
-                        echo 'go to rss';
-                        return $app->redirect('/');
-                    }
+
+        return $app['twig']->render('login.twig', array(
+            'userId' => $userId,
+            'act' => 'login'
+        ));
+    }
+
+    public function loginPost(Request $request, Application $app)
+    {
+        if ($userId = $app['modelUser']->auth()) {
+            return $app->redirect('/');
+        }
+
+        $email = $request->get('email');
+        $password = $request->get('password');
+        $warning = $app['modelUser']->userDataValidate($email, $password);
+        if (empty($warning)) {
+            $warning = [];
+            $user = $app['modelUser']->getUserByEmail($email);
+            if (!$user) {
+                $warning[] = 'User with given e-mail not found';
+            } else {
+                if (!$warning[] = $app['modelUser']->checkPassword($user, $password)) {
+                    return $app->redirect('/');
                 }
             }
         }
-
-        print_r($warning);
-        return '<form action="/login" method="post">
- <label>Email<input type="text" name="email"></label> 
- <label>Password<input type="password" name="password"></label>
-  <input type="submit">
- </form>';
+        return $app['twig']->render('login.twig', array(
+            'userId' => $userId,
+            'act' => 'login',
+            'warning' => $warning,
+        ));
     }
 
     public function register(Request $request, Application $app)
     {
         if ($userId = $app['modelUser']->auth()) {
-            echo 'go to rss';
             return $app->redirect('/');
         }
-        if ($request->getMethod() == 'POST') {
-            $email = $request->get('email');
-            $password = $request->get('password');
-            $warning = $app['modelUser']->userDataValidate($email, $password);
 
-            if (empty($warning)) {
-                $user = $app['modelUser']->getUserByEmail($email);
-                if (!$user) {
-                    $app['modelUser']->addNewUser($email, $password);
-                    echo 'go to rss';
-                    return $app->redirect('/');
-                } else {
-                    $warning[] = 'User with given e-mail already exist';
-                }
+        return $app['twig']->render('login.twig', array(
+            'userId' => $userId,
+            'act' => 'register',
+        ));
+    }
+
+    public function registerPost(Request $request, Application $app)
+    {
+        if ($userId = $app['modelUser']->auth()) {
+            return $app->redirect('/');
+        }
+
+        $email = $request->get('email');
+        $password = $request->get('password');
+        $warning = $app['modelUser']->userDataValidate($email, $password);
+
+        if (empty($warning)) {
+            $user = $app['modelUser']->getUserByEmail($email);
+            if (!$user) {
+                $app['modelUser']->addNewUser($email, $password);
+                return $app->redirect('/');
+            } else {
+                $warning[] = 'User with given e-mail already exist';
             }
         }
 
-        print_r($warning);
-        return '<form action="/register" method="post">
- <label>Email<input type="text" name="email"></label> 
- <label>Password<input type="password" name="password"></label>
-  <input type="submit">
- </form>';
+        return $app['twig']->render('login.twig', array(
+            'userId' => $userId,
+            'act' => 'register',
+            'warning' => $warning,
+        ));
     }
+
 
     public function logout(Request $request, Application $app)
     {
         $app['modelUser']->unsetAuth();
-        echo 'go to login';
+
         return $app->redirect('/login');
     }
 }

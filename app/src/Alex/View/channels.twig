@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+{{ include('layout/head.twig') }}
+<body>
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+            <span class="mdl-layout-title">RSS reader</span>
+            <div class="mdl-layout-spacer"></div>
+            <nav class="mdl-navigation mdl-layout--large-screen-only">
+                {% if userId is defined and userId is not empty %}
+                    <a class="mdl-navigation__link" href="/logout">Logout</a>
+                {% else %}
+                    <a class="mdl-navigation__link" href="/login">Login</a>
+                    <a class="mdl-navigation__link" href="/register">Register</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+    <main class="mdl-layout__content">
+        <div class="page-content">
+            <div class="mdl-grid">
+
+                <div class="mdl-cell mdl-cell--5-col mdl-cell--8-col-tablet mdl-cell--4-col-phone mdl-card mdl-shadow--6dp">
+                    <div class="mdl-card__title">
+                        <button class="mdl-button mdl-js-button" id="addChannel">
+                            Add channel
+                        </button>
+                        <div class="mdl-layout-spacer"></div>
+                        <button class="mdl-button mdl-js-button" id="removeChannel">
+                            Remove channel
+                        </button>
+                    </div>
+                    <div class="mdl-card__actions mdl-card--border"></div>
+                    {% if warning is defined and warning is not empty %}
+                        <div class="mdl-card__supporting-text mdl-color-text--red-500">
+                            <ul>
+                                {% for warn in warning %}
+                                    <li>{{ warn }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    <div class="mdl-card__supporting-text">
+                        {% if channels is defined and channels is not empty %}
+                            <ul class="demo-list-icon mdl-list">
+                                {% for channel in channels %}
+                                    <li class="mdl-list__item">
+                                        <span class="mdl-list__item-primary-content">
+                                            <i class="material-icons mdl-list__item-icon">person</i>
+                                            {{ channel['url']|slice(0, 40) }}...
+                                        </span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <div class="mdl-card__supporting-text">
+                                Please, add channels
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mdl-cell mdl-cell--7-col mdl-cell--8-col-tablet mdl-cell--4-col-phone mdl-card mdl-shadow--6dp">
+                    <div class="mdl-card__title">
+                        Feeds
+                    </div>
+                    <div class="mdl-card__actions mdl-card--border"></div>
+                    {% if feeds is defined and feeds is not empty %}
+                        {% for feedsList in feeds %}
+                            <div class="mdl-card__supporting-text">
+                                <ul class="demo-list-two mdl-list">
+                                    {% for feed in feedsList %}
+                                        <li class="mdl-list__item mdl-list__item--two-line">
+                                            <span class="mdl-list__item-primary-content">
+                                                <span>{{ feed['title'] }}</span>
+                                                <span class="mdl-list__item-sub-title">{{ feed['description']|raw }}</span>
+                                            </span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="mdl-card__supporting-text">
+                            Please, add channels
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<dialog class="mdl-dialog" id="dialogRemove">
+    <h4 class="mdl-dialog__title">Remove channel</h4>
+    <div class="mdl-dialog__content">
+        <p>
+            Are you really want to remove channel?
+        </p>
+        <form action="/del" method="post" id="removeForm"></form>
+        <select form="removeForm" name="channelId" required>
+            {% if channels is defined and channels is not empty %}
+                {% for channel in channels %}
+                    <option selected value="{{ channel['chanel_id'] }}">{{ channel['url']|slice(0, 35) }}</option>
+                {% endfor %}
+            {% endif %}
+        </select>
+    </div>
+    <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button  closeRemove">Cancel</button>
+        <div class="mdl-layout-spacer"></div>
+        <button type="submit" form="removeForm" class="mdl-button close">Remove</button>
+    </div>
+</dialog>
+<script>
+    var dialog = document.querySelector('#dialogRemove');
+    var showDialogButton = document.querySelector('#removeChannel');
+    if (!dialog.showModal) {
+        dialogPolyfill.registerDialog(dialog);
+    }
+    showDialogButton.addEventListener('click', function () {
+        dialog.showModal();
+    });
+    dialog.querySelector('.closeRemove').addEventListener('click', function () {
+        dialog.close();
+    });
+</script>
+<dialog class="mdl-dialog" id="dialogAdd">
+    <h6 class="mdl-dialog__title">Add channel</h6>
+    <div class="mdl-dialog__content">
+        <form action="/" method="post" id="addForm"></form>
+        <div class="mdl-textfield mdl-js-textfield">
+            <input class="mdl-textfield__input" type="text" form="addForm" name="channelUrl">
+        </div>
+    </div>
+    <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button closeAdd close">Cancel</button>
+        <div class="mdl-layout-spacer"></div>
+        <button type="submit" form="addForm" class="mdl-button ">Add</button>
+    </div>
+</dialog>
+<script>
+    var dialogAdd = document.querySelector('#dialogAdd');
+    var showDialogButtonAdd = document.querySelector('#addChannel');
+    if (!dialogAdd.showModal) {
+        dialogPolyfill.registerDialog(dialog);
+    }
+    showDialogButtonAdd.addEventListener('click', function () {
+        dialogAdd.showModal();
+    });
+    dialogAdd.querySelector('.closeAdd').addEventListener('click', function () {
+        dialogAdd.close();
+    });
+</script>
+</body>
+</html>
+

@@ -16,13 +16,14 @@ class Feed extends Model
 
     public function addFeed($chanel_id, $feed)
     {
+        $feed->description = strip_tags($feed->description);
         return $this->app['db']->executeQuery("INSERT IGNORE INTO {$this->table} (chanel_id, guid, title, description, link) 
 VALUES (?, ?, ?, ?, ?)", [$chanel_id, $feed->guid, $feed->title, $feed->description, $feed->link]);
     }
 
     public function getFeedsByChannel($channelId)
     {
-        return $this->app['db']->fetchAll("SELECT * FROM {$this->table} WHERE chanel_id = {$channelId}");
+        return $this->app['db']->fetchAll("SELECT * FROM {$this->table} WHERE chanel_id = {$channelId} ORDER BY id DESC LIMIT 5");
     }
 
     public function dleteFeedsForChannel($channelId)

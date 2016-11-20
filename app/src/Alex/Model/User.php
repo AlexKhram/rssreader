@@ -16,11 +16,14 @@ class User extends Model
 
     public function getUserByEmail($email)
     {
+        $email = addslashes($email);
         return $this->app['db']->fetchAssoc("SELECT * FROM {$this->table} WHERE email = '{$email}'");
     }
 
     public function addNewUser($email, $password)
     {
+        $email = addslashes($email);
+        $password = addslashes($password);
         $this->app['db']->insert($this->table, array('email' => $email, 'password' => $password));
         $userId = $this->app['db']->lastInsertId();
         $this->app['session']->set('auth', 1);
@@ -54,6 +57,7 @@ class User extends Model
 
     public function checkPassword($user, $password)
     {
+        $password = addslashes($password);
         if ($user['password'] === $password) {
             $this->setAuth($user['id']);
             return;

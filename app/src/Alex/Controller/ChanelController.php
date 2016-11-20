@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ChanelController
 {
-    public function index(Request $request, Application $app)
+    public function index(Request $request, Application $app, $warning = [])
     {
         if (!$userId = $app['modelUser']->auth()) {
             echo 'go to login';
@@ -21,77 +21,75 @@ class ChanelController
         }
 
         $channels = $app['modelChannel']->getChannelsForUser($userId);
-        echo '<ul>';
-        foreach ($channels as $channel){
-            echo '<li>';
-            echo $channel['url'];
-            echo '</li>';
-            $feeds = $app['modelFeed']->getFeedsByChannel($channel['chanel_id']);
-            echo '<ul>';
-            foreach ($feeds as $feed){
-                echo '<li>';
-                echo $feed['title'];
-                echo '</li>';
-            }
-            echo '</ul>';
+        $feeds = [];
+        foreach ($channels as $channel) {
+            $feeds[] = $app['modelFeed']->getFeedsByChannel($channel['chanel_id']);
         }
-        echo '</ul>';
 
-//
-//        $rss = @simplexml_load_file($channels[0]['url']);
-////        var_dump($rss->channel->item);
-//
-//        foreach ($rss->channel->item as $feed) {
-//            $app['modelFeed']->addFeed($channels[0]['chanel_id'], $feed);
-//        }
-
-
-        return '<form action="/chanel" method="post">
- <label>URL for rss<input type="text" name="url"></label> 
-  <input type="submit">
- </form>';
+        return $app['twig']->render('channels.twig', array(
+            'userId' => $userId,
+            'channels' => $channels,
+            'feeds' => $feeds,
+            'warning' => $warning,
+        ));
     }
 
-    public function add(Request $request, Application $app){
+    public function add(Request $request, Application $app)
+    {
         if (!$userId = $app['modelUser']->auth()) {
-            echo 'go to login';
             return $app->redirect('/login');
         }
-        $chanelUrl = $request->get('url');
-        if($channel = $app['modelChannel']->getChannelByUrl($chanelUrl)){
-            if(!$chanelForUser = $app['modelChannel']->getChannelForUser($userId, $channel['id'])){
+        $warning = [];
+        $chanelUrl = $request->get('channelUrl');
+        if ($channel = $app['modelChannel']->getChannelByUrl($chanelUrl)) {
+            if (!$chanelForUser = $app['modelChannel']->getChannelForUser($userId, $channel['id'])) {
                 $app['modelChannel']->addChannelForUser($userId, $channel['id']);
+            } else {
+                $warning[] = "Channel already exist";
             }
-            echo 'channel exist';
         } else {
             $rss = @simplexml_load_file($chanelUrl);
-            if($rss and isset($rss->channel) and isset($rss->channel->item)){
+            if ($rss and isset($rss->channel) and isset($rss->channel->item)) {
                 $channelId = $app['modelChannel']->addChannel($chanelUrl);
                 $app['modelChannel']->addChannelForUser($userId, $channelId);
                 foreach ($rss->channel->item as $feed) {
                     $app['modelFeed']->addFeed($channelId, $feed);
                 }
-                echo "Work url";
             } else {
-                echo "Invalid url";
+                $warning[] = "Invalid url for RSS";
             }
         }
-        return 1;
+        return $this->index($request, $app, $warning);
     }
 
-    public function delete(Request $request, Application $app){
+    public function delete(Request $request, Application $app)
+    {
         if (!$userId = $app['modelUser']->auth()) {
-            echo 'go to login';
             return $app->redirect('/login');
         }
-        $channelId =  $request->get('channelId');
-        $channelId = 8;
+
+        $channelId = $request->get('channelId');
+        var_dump($channelId);
         $app['modelChannel']->deleteChannelForUser($userId, $channelId);
-        if(!$chanelForUser = $app['modelChannel']->getChannelsForUserById($channelId)){
+        if (!$chanelForUser = $app['modelChannel']->getChannelsForUserById($channelId)) {
             $app['modelFeed']->dleteFeedsForChannel($channelId);
             $app['modelChannel']->dleteChannel($channelId);
             echo 'delete chanel';
         }
-        return 1;
+        return $app->redirect('/');
+    }
+
+    public function update(Request $request, Application $app)
+    {
+        $channels = $app['modelChannel']->getAllChannels();
+        foreach ($channels as $channel){
+            $rss = @simplexml_load_file($channel['url']);
+            if ($rss and isset($rss->channel) and isset($rss->channel->item)) {
+                foreach ($rss->channel->item as $feed) {
+                    $app['modelFeed']->addFeed($channel['id'], $feed);
+                }
+            }
+        }
+        return $app->json(['status'=>'updated']);
     }
 }

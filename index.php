@@ -8,6 +8,9 @@ $app = new Silex\Application();
 $app['debug'] = true; //////////////////////////////////////////////////////// change it
 
 $app->register(new Silex\Provider\SessionServiceProvider());
+$app->register(new Silex\Provider\TwigServiceProvider(), array(
+    'twig.path' => __DIR__.'/app/src/Alex/View',
+));
 $app->register(new Silex\Provider\DoctrineServiceProvider(), array(
     'db.options' => [
         'driver' => 'pdo_mysql',
@@ -26,12 +29,13 @@ $app['modelFeed'] = new Alex\Model\Feed($app);
 
 // routing
 $app->get('/', "Alex\Controller\ChanelController::index");
-$app->get('/del', "Alex\Controller\ChanelController::delete");
-$app->post('/chanel', "Alex\Controller\ChanelController::add");
-$app->match('/login', "Alex\Controller\UserController::login")
-    ->method('GET|POST');
-$app->match('/register', "Alex\Controller\UserController::register")
-    ->method('GET|POST');
+$app->post('/', "Alex\Controller\ChanelController::add");
+$app->post('/del', "Alex\Controller\ChanelController::delete");
+$app->get('/update', "Alex\Controller\ChanelController::update");
+$app->get('/login', "Alex\Controller\UserController::login");
+$app->post('/login', "Alex\Controller\UserController::loginPost");
+$app->get('/register', "Alex\Controller\UserController::register");
+$app->post('/register', "Alex\Controller\UserController::registerPost");
 $app->get('/logout',  "Alex\Controller\UserController::logout");
 $app->run();
 

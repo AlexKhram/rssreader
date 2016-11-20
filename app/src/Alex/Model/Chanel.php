@@ -19,6 +19,11 @@ class Chanel extends Model
         return $this->app['db']->fetchAssoc("SELECT * FROM {$this->table} WHERE url = '{$url}'");
     }
 
+    public function getAllChannels()
+    {
+        return $this->app['db']->fetchAll("SELECT * FROM {$this->table}");
+    }
+
     public function addChannel($url)
     {
         $this->app['db']->insert($this->table, array('url' => $url));
@@ -27,7 +32,7 @@ class Chanel extends Model
     }
 
     public function dleteChannel($channelId){
-        return $this->app['db']->delete('channels', array('id'=>$channelId));
+        return $this->app['db']->delete($this->table, array('id'=>$channelId));
     }
 
     public function addChannelForUser($userId, $channelId)
@@ -38,6 +43,7 @@ class Chanel extends Model
     public function getChannelForUser($userId, $channelId){
         return $this->app['db']->fetchAssoc("SELECT * FROM user_channels WHERE user_id = '{$userId}' AND chanel_id = {$channelId}");
     }
+
     public function getChannelsForUser($userId){
         return $this->app['db']->fetchAll("SELECT user_channels.chanel_id, channels.url FROM user_channels LEFT JOIN channels ON user_channels.chanel_id = channels.id WHERE user_channels.user_id = {$userId}");
     }
