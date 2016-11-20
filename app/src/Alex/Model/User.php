@@ -35,10 +35,10 @@ class User extends Model
     {
         $warning = [];
         if ($email == NULL or !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $warning[] = "E-mail not valid.";
+            $warning[] = ["error"=>"E-mail not valid."];
         }
         if ($password == NULL) {
-            $warning[] = "Password is empty.";
+            $warning[] = ["error"=>"Password is empty."];
         }
         return $warning;
     }

@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ChanelController
 {
-    public function index(Request $request, Application $app, $warning = [])
+    public function index(Request $request, Application $app)
     {
         if (!$userId = $app['modelUser']->auth()) {
             return $app->redirect('/login');
@@ -33,7 +33,6 @@ class ChanelController
             'userId' => $userId,
             'channels' => $channels,
             'feeds' => $feeds,
-            'warning' => $warning,
         ));
     }
 
@@ -83,7 +82,7 @@ class ChanelController
             $app['modelFeed']->dleteFeedsForChannel($channelId);
             $app['modelChannel']->dleteChannel($channelId);
         }
-        return $app->redirect('/');
+        return $app->json(["status" => "Channel was deleted"], 200);
     }
 
     public function update(Request $request, Application $app)

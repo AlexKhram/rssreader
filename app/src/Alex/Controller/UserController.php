@@ -35,21 +35,16 @@ class UserController
         $password = $request->get('password');
         $warning = $app['modelUser']->userDataValidate($email, $password);
         if (empty($warning)) {
-            $warning = [];
             $user = $app['modelUser']->getUserByEmail($email);
             if (!$user) {
-                $warning[] = 'User with given e-mail not found';
+                return $app->json(["error" => "User with given e-mail not found"], 400);
             } else {
                 if (!$warning[] = $app['modelUser']->checkPassword($user, $password)) {
-                    return $app->redirect('/');
+                    return $app->json(["status" => "User is logined"], 200);
                 }
             }
         }
-        return $app['twig']->render('login.twig', array(
-            'userId' => $userId,
-            'act' => 'login',
-            'warning' => $warning,
-        ));
+        return $app->json($warning, 400);
     }
 
     public function register(Request $request, Application $app)
@@ -78,17 +73,13 @@ class UserController
             $user = $app['modelUser']->getUserByEmail($email);
             if (!$user) {
                 $app['modelUser']->addNewUser($email, $password);
-                return $app->redirect('/');
+                return $app->json(["status" => "User is registered"], 200);
             } else {
-                $warning[] = 'User with given e-mail already exist';
+                return $app->json(["error"=>'User with given e-mail already exist'], 400);
             }
         }
 
-        return $app['twig']->render('login.twig', array(
-            'userId' => $userId,
-            'act' => 'register',
-            'warning' => $warning,
-        ));
+        return $app->json($warning, 400);
     }
 
 

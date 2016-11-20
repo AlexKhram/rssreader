@@ -24,48 +24,68 @@
                 <div class="mdl-cell mdl-cell--4-col"></div>
                 <div class="mdl-cell mdl-cell--4-col">
                     <div class="mdl-card mdl-shadow--6dp" align="center">
-                        {% if warning is defined and warning is not empty %}
-                            <div class="mdl-card__supporting-text mdl-color-text--red-500">
-                                <ul>
-                                    {% for warn in warning %}
-                                        <li>{{ warn }}</li>
-                                    {% endfor %}
-                                </ul>
+                        <div class="mdl-dialog__content mdl-color-text--red-500" id="loginMessage"></div>
+                        <div class="mdl-card__supporting-text">
+                            <div class="mdl-textfield mdl-js-textfield">
+                                <input class="mdl-textfield__input" type="email" id="inputEmail" name="email"/>
+                                <label class="mdl-textfield__label" for="email">Email</label>
                             </div>
-                        {% endif %}
-                        {% if act is defined and act == 'login' %}
-                        <form action="/login" method="post">
+                            <div class="mdl-textfield mdl-js-textfield">
+                                <input class="mdl-textfield__input" type="password" id="inputPassword"
+                                       name="password"/>
+                                <label class="mdl-textfield__label" for="password">Password</label>
+                            </div>
+                        </div>
+                        <div class="mdl-card__actions mdl-card--border">
+                            {% if act is defined and act == 'login' %}
+                                <button type="button" class="mdl-button" onclick="doAuth('/login')">Log in</button>
                             {% else %}
-                            <form action="/register" method="post">
-                                {% endif %}
-                                <div class="mdl-card__supporting-text">
-                                    <div class="mdl-textfield mdl-js-textfield">
-                                        <input class="mdl-textfield__input" type="email" name="email"/>
-                                        <label class="mdl-textfield__label" for="email">Email</label>
-                                    </div>
-                                    <div class="mdl-textfield mdl-js-textfield">
-                                        <input class="mdl-textfield__input" type="password" name="password"/>
-                                        <label class="mdl-textfield__label" for="password">Password</label>
-                                    </div>
-                                </div>
-                                <div class="mdl-card__actions mdl-card--border">
-                                    {% if act is defined and act == 'login' %}
-                                        <input type="submit"
-                                               class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
-                                               value="Log in">
-                                    {% else %}
-                                        <input type="submit"
-                                               class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
-                                               value="Register">
-                                    {% endif %}
-                                </div>
-                            </form>
+                                <button type="button" class="mdl-button" onclick="doAuth('/register')">Register</button>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 </div>
+<script>
+    function doAuth(path) {
+        var email = document.getElementById("inputEmail").value;
+        var password = document.getElementById("inputPassword").value;
+        var body = 'email=' + encodeURIComponent(email) +
+                '&password=' + encodeURIComponent(password);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', path, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send(body);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                window.location = "/";
+            } else if (xhr.readyState == 4 && xhr.status == 400) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    var warning = "";
+                    for (var key in data) {
+                        if (data[key].error) {
+                            warning += data[key].error;
+                        } else {
+                            warning += data[key];
+                        }
+                    }
+                    var warningMessage = document.getElementById("loginMessage");
+                    warningMessage.innerHTML = warning;
+                }
+                catch
+                        (err) {
+                    console.log(err.message);
+                    return;
+                }
+            }
+        }
+    }
+
+</script>
 </body>
 </html>
 

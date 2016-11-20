@@ -33,15 +33,6 @@
                         </button>
                     </div>
                     <div class="mdl-card__actions mdl-card--border"></div>
-                    {% if warning is defined and warning is not empty %}
-                        <div class="mdl-card__supporting-text mdl-color-text--red-500">
-                            <ul>
-                                {% for warn in warning %}
-                                    <li>{{ warn }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
                     <div class="mdl-card__supporting-text">
                         {% if channels is defined and channels is not empty %}
                             <ul class="demo-list-icon mdl-list">
@@ -93,6 +84,7 @@
                     </div>
                 </div>
             </div>
+        </div>
     </main>
 </div>
 <dialog class="mdl-dialog" id="dialogRemove">
@@ -102,8 +94,7 @@
         <p>
             Are you really want to remove channel?
         </p>
-        <form action="/del" method="post" id="removeForm"></form>
-        <select form="removeForm" name="channelId" id="selectChannelRemove" required>
+        <select name="channelId" id="selectChannelRemove" required>
             {% if channels is defined and channels is not empty %}
                 {% for channel in channels %}
                     <option selected value="{{ channel['chanel_id'] }}">{{ channel['url']|slice(0, 35) }}</option>
@@ -114,7 +105,6 @@
     <div class="mdl-dialog__actions">
         <button type="button" class="mdl-button  closeRemove">Cancel</button>
         <div class="mdl-layout-spacer"></div>
-        {#<button type="submit" form="removeForm" class="mdl-button close">Remove</button>#}
         <button type="button" class="mdl-button" onclick="deleteChannel()">Remove</button>
     </div>
 </dialog>
@@ -135,15 +125,13 @@
     <h6 class="mdl-dialog__title">Add channel</h6>
     <div class="mdl-dialog__content mdl-color-text--red-500" id="addChannelMessage"></div>
     <div class="mdl-dialog__content">
-        <form action="/" method="post" id="addForm"></form>
         <div class="mdl-textfield mdl-js-textfield">
-            <input class="mdl-textfield__input" type="text" id="inputAddChannel" form="addForm" name="channelUrl">
+            <input class="mdl-textfield__input" type="text" id="inputAddChannel" name="channelUrl">
         </div>
     </div>
     <div class="mdl-dialog__actions">
         <button type="button" class="mdl-button closeAdd close">Cancel</button>
         <div class="mdl-layout-spacer"></div>
-        {#<button type="submit" form="addForm" class="mdl-button ">Add</button>#}
         <button type="button" class="mdl-button" onclick="addChannel()">Add</button>
     </div>
 </dialog>
