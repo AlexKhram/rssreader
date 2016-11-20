@@ -2,6 +2,7 @@
 ini_set('display_errors',1); //////////////////////////////////////////////////////// change it
 
 require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__.'/app/config.php';
 
 $app = new Silex\Application();
 
@@ -12,14 +13,7 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
     'twig.path' => __DIR__.'/app/src/Alex/View',
 ));
 $app->register(new Silex\Provider\DoctrineServiceProvider(), array(
-    'db.options' => [
-        'driver' => 'pdo_mysql',
-        'host' => 'localhost',
-        'dbname' => 'rss',
-        'user' => 'root',
-        'password' => '',
-        'charset' => 'utf8',
-    ]
+    'db.options' => $dbParams
 ));
 
 // models
