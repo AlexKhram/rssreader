@@ -16,7 +16,6 @@ class ChanelController
     public function index(Request $request, Application $app, $warning = [])
     {
         if (!$userId = $app['modelUser']->auth()) {
-            echo 'go to login';
             return $app->redirect('/login');
         }
 
@@ -78,7 +77,6 @@ class ChanelController
         if (!$chanelForUser = $app['modelChannel']->getChannelsForUserById($channelId)) {
             $app['modelFeed']->dleteFeedsForChannel($channelId);
             $app['modelChannel']->dleteChannel($channelId);
-            echo 'delete chanel';
         }
         return $app->redirect('/');
     }
