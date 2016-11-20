@@ -9,6 +9,7 @@
 * В файле */app/config.php* указать настройки доступа к БД (хост, логин, пароль)
 * Указать Apache (или другому серверу) корневую папку проекта. (файл .htaccess со входом на index.php уже присутсвует впроекте)
 * В браузере перейти по адресу *http://localhost/*
+* Для обновления фидов добавить в планировщик заданий посещение эндпоинта http://localhost/update каждые 5 минут, например ```cron */5 * * * * /usr/bin/wget -O - -q -t 1 http://localhost/update```
 
 ### Спасибо за внимание
 ![alt tag](https://raw.githubusercontent.com/AlexKhram/rssreader/master/printscreen.jpg)
