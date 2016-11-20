@@ -23,7 +23,11 @@ class ChanelController
         $channels = $app['modelChannel']->getChannelsForUser($userId);
         $feeds = [];
         foreach ($channels as $channel) {
-            $feeds[] = $app['modelFeed']->getFeedsByChannel($channel['chanel_id']);
+            $feeds[] = [
+                'channelId' => $channel['chanel_id'],
+                'channelUrl' => $channel['url'],
+                'feedList' => $app['modelFeed']->getFeedsByChannel($channel['chanel_id'])
+            ];
         }
 
         return $app['twig']->render('channels.twig', array(

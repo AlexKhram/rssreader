@@ -46,8 +46,8 @@
                             <ul class="demo-list-icon mdl-list">
                                 {% for channel in channels %}
                                     <li class="mdl-list__item">
-                                        <span class="mdl-list__item-primary-content">
-                                            <i class="material-icons mdl-list__item-icon">person</i>
+                                        <span class="mdl-list__item-primary-content" style="cursor: pointer" onclick="showFeeds({{ channel['chanel_id'] }})">
+                                            <i class="material-icons mdl-list__item-icon">description</i>
                                             {{ channel['url']|slice(0, 40) }}...
                                         </span>
                                     </li>
@@ -62,18 +62,19 @@
                 </div>
 
                 <div class="mdl-cell mdl-cell--7-col mdl-cell--8-col-tablet mdl-cell--4-col-phone mdl-card mdl-shadow--6dp">
-                    <div class="mdl-card__title">
-                        Feeds
-                    </div>
-                    <div class="mdl-card__actions mdl-card--border"></div>
                     {% if feeds is defined and feeds is not empty %}
                         {% for feedsList in feeds %}
-                            <div class="mdl-card__supporting-text">
+                            {% if loop.index == 1 %}
+                            <div class="mdl-card__supporting-text feeds" id="feeds{{ feedsList['channelId'] }}">
+                            {% else %}
+                            <div class="mdl-card__supporting-text feeds" id="feeds{{ feedsList['channelId'] }}" style="display: none">
+                            {% endif %}
+                                <h5>{{ feedsList['channelUrl'] }}</h5>
                                 <ul class="demo-list-two mdl-list">
-                                    {% for feed in feedsList %}
+                                    {% for feed in feedsList['feedList'] %}
                                         <li class="mdl-list__item mdl-list__item--two-line">
                                             <span class="mdl-list__item-primary-content">
-                                                <span>{{ feed['title'] }}</span>
+                                                <span> <a href="{{ feed['link'] }}" >{{ feed['title'] }}</a></span>
                                                 <span class="mdl-list__item-sub-title">{{ feed['description']|raw }}</span>
                                             </span>
                                         </li>
@@ -151,6 +152,16 @@
     dialogAdd.querySelector('.closeAdd').addEventListener('click', function () {
         dialogAdd.close();
     });
+</script>
+<script>
+    function showFeeds(channelId){
+        var newFeeds = document.querySelector('#feeds' + channelId);
+        var allFeeds = document.getElementsByClassName('feeds');
+        for (i = 0; i < allFeeds.length; i++){
+            allFeeds[i].style.display = "none";
+        }
+        newFeeds.style.display = "";
+    }
 </script>
 </body>
 </html>
