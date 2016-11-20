@@ -23,7 +23,7 @@ class User extends Model
     public function addNewUser($email, $password)
     {
         $email = addslashes($email);
-        $password = addslashes($password);
+        $password = password_hash($password, PASSWORD_DEFAULT);
         $this->app['db']->insert($this->table, array('email' => $email, 'password' => $password));
         $userId = $this->app['db']->lastInsertId();
         $this->app['session']->set('auth', 1);
@@ -57,8 +57,7 @@ class User extends Model
 
     public function checkPassword($user, $password)
     {
-        $password = addslashes($password);
-        if ($user['password'] === $password) {
+        if (password_verify($password, $user['password'])) {
             $this->setAuth($user['id']);
             return;
         }
