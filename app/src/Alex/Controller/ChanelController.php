@@ -44,11 +44,14 @@ class ChanelController
         }
         $warning = [];
         $chanelUrl = $request->get('channelUrl');
+        if (empty($chanelUrl)) {
+            return $app->json(["error" => "Url is empty"], 400);
+        }
         if ($channel = $app['modelChannel']->getChannelByUrl($chanelUrl)) {
             if (!$chanelForUser = $app['modelChannel']->getChannelForUser($userId, $channel['id'])) {
                 $app['modelChannel']->addChannelForUser($userId, $channel['id']);
             } else {
-                $warning[] = "Channel already exist";
+                return $app->json(["error" => "Channel already exis"], 400);
             }
         } else {
             $rss = @simplexml_load_file($chanelUrl);
@@ -59,10 +62,10 @@ class ChanelController
                     $app['modelFeed']->addFeed($channelId, $feed);
                 }
             } else {
-                $warning[] = "Invalid url for RSS";
+                return $app->json(["error" => "Invalid url for RSS"], 400);
             }
         }
-        return $this->index($request, $app, $warning);
+        return $app->json(["status" => "New channel was added"], 200);
     }
 
     public function delete(Request $request, Application $app)
@@ -72,8 +75,10 @@ class ChanelController
         }
 
         $channelId = $request->get('channelId');
-        var_dump($channelId);
-        $app['modelChannel']->deleteChannelForUser($userId, $channelId);
+        if (empty($channelId)) {
+            return $app->json(["error" => "Chose any channel"], 400);
+        }
+        $app['modelChannel']->deleteChannelForUser($userId, (int)$channelId);
         if (!$chanelForUser = $app['modelChannel']->getChannelsForUserById($channelId)) {
             $app['modelFeed']->dleteFeedsForChannel($channelId);
             $app['modelChannel']->dleteChannel($channelId);
@@ -84,7 +89,7 @@ class ChanelController
     public function update(Request $request, Application $app)
     {
         $channels = $app['modelChannel']->getAllChannels();
-        foreach ($channels as $channel){
+        foreach ($channels as $channel) {
             $rss = @simplexml_load_file($channel['url']);
             if ($rss and isset($rss->channel) and isset($rss->channel->item)) {
                 foreach ($rss->channel->item as $feed) {
@@ -92,6 +97,6 @@ class ChanelController
                 }
             }
         }
-        return $app->json(['status'=>'updated']);
+        return $app->json(['status' => 'updated']);
     }
 }

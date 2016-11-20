@@ -47,7 +47,8 @@
                             <ul class="demo-list-icon mdl-list">
                                 {% for channel in channels %}
                                     <li class="mdl-list__item">
-                                        <span class="mdl-list__item-primary-content" style="cursor: pointer" onclick="showFeeds({{ channel['chanel_id'] }})">
+                                        <span class="mdl-list__item-primary-content" style="cursor: pointer"
+                                              onclick="showFeeds({{ channel['chanel_id'] }})">
                                             <i class="material-icons mdl-list__item-icon">description</i>
                                             {{ channel['url']|slice(0, 40) }}...
                                         </span>
@@ -64,43 +65,45 @@
 
                 <div class="mdl-cell mdl-cell--7-col mdl-cell--8-col-tablet mdl-cell--4-col-phone mdl-card mdl-shadow--6dp">
                     {% if feeds is defined and feeds is not empty %}
-                        {% for feedsList in feeds %}
-                            {% if loop.index == 1 %}
-                            <div class="mdl-card__supporting-text feeds" id="feeds{{ feedsList['channelId'] }}">
-                            {% else %}
-                            <div class="mdl-card__supporting-text feeds" id="feeds{{ feedsList['channelId'] }}" style="display: none">
+                    {% for feedsList in feeds %}
+                    {% if loop.index == 1 %}
+                    <div class="mdl-card__supporting-text feeds" id="feeds{{ feedsList['channelId'] }}">
+                        {% else %}
+                        <div class="mdl-card__supporting-text feeds" id="feeds{{ feedsList['channelId'] }}"
+                             style="display: none">
                             {% endif %}
-                                <h5>{{ feedsList['channelUrl'] }}</h5>
-                                <ul class="demo-list-two mdl-list">
-                                    {% for feed in feedsList['feedList'] %}
-                                        <li class="mdl-list__item mdl-list__item--two-line">
+                            <h5>{{ feedsList['channelUrl'] }}</h5>
+                            <ul class="demo-list-two mdl-list">
+                                {% for feed in feedsList['feedList'] %}
+                                    <li class="mdl-list__item mdl-list__item--two-line">
                                             <span class="mdl-list__item-primary-content">
-                                                <span> <a href="{{ feed['link'] }}" >{{ feed['title'] }}</a></span>
+                                                <span> <a href="{{ feed['link'] }}">{{ feed['title'] }}</a></span>
                                                 <span class="mdl-list__item-sub-title">{{ feed['description']|raw }}</span>
                                             </span>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="mdl-card__supporting-text">
-                            Please, add channels
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         </div>
-                    {% endif %}
+                        {% endfor %}
+                        {% else %}
+                            <div class="mdl-card__supporting-text">
+                                Please, add channels
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
     </main>
 </div>
 <dialog class="mdl-dialog" id="dialogRemove">
-    <h4 class="mdl-dialog__title">Remove channel</h4>
+    <h3 class="mdl-dialog__title">Remove channel</h3>
+    <div class="mdl-dialog__content mdl-color-text--red-500" id="removeChannelMessage"></div>
     <div class="mdl-dialog__content">
         <p>
             Are you really want to remove channel?
         </p>
         <form action="/del" method="post" id="removeForm"></form>
-        <select form="removeForm" name="channelId" required>
+        <select form="removeForm" name="channelId" id="selectChannelRemove" required>
             {% if channels is defined and channels is not empty %}
                 {% for channel in channels %}
                     <option selected value="{{ channel['chanel_id'] }}">{{ channel['url']|slice(0, 35) }}</option>
@@ -111,7 +114,8 @@
     <div class="mdl-dialog__actions">
         <button type="button" class="mdl-button  closeRemove">Cancel</button>
         <div class="mdl-layout-spacer"></div>
-        <button type="submit" form="removeForm" class="mdl-button close">Remove</button>
+        {#<button type="submit" form="removeForm" class="mdl-button close">Remove</button>#}
+        <button type="button" class="mdl-button" onclick="deleteChannel()">Remove</button>
     </div>
 </dialog>
 <script>
@@ -129,16 +133,18 @@
 </script>
 <dialog class="mdl-dialog" id="dialogAdd">
     <h6 class="mdl-dialog__title">Add channel</h6>
+    <div class="mdl-dialog__content mdl-color-text--red-500" id="addChannelMessage"></div>
     <div class="mdl-dialog__content">
         <form action="/" method="post" id="addForm"></form>
         <div class="mdl-textfield mdl-js-textfield">
-            <input class="mdl-textfield__input" type="text" form="addForm" name="channelUrl">
+            <input class="mdl-textfield__input" type="text" id="inputAddChannel" form="addForm" name="channelUrl">
         </div>
     </div>
     <div class="mdl-dialog__actions">
         <button type="button" class="mdl-button closeAdd close">Cancel</button>
         <div class="mdl-layout-spacer"></div>
-        <button type="submit" form="addForm" class="mdl-button ">Add</button>
+        {#<button type="submit" form="addForm" class="mdl-button ">Add</button>#}
+        <button type="button" class="mdl-button" onclick="addChannel()">Add</button>
     </div>
 </dialog>
 <script>
@@ -155,13 +161,70 @@
     });
 </script>
 <script>
-    function showFeeds(channelId){
+    function showFeeds(channelId) {
         var newFeeds = document.querySelector('#feeds' + channelId);
         var allFeeds = document.getElementsByClassName('feeds');
-        for (i = 0; i < allFeeds.length; i++){
+        for (i = 0; i < allFeeds.length; i++) {
             allFeeds[i].style.display = "none";
         }
         newFeeds.style.display = "";
+    }
+
+    function deleteChannel() {
+        var channelIdRemove = document.getElementById("selectChannelRemove").value;
+        var body = 'channelId=' + encodeURIComponent(channelIdRemove);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/del', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send(body);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                window.location = "/";
+            } else if (xhr.readyState == 4 && xhr.status == 400) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    var warning = "";
+                    for (var key in data) {
+                        warning += data[key];
+                    }
+                    var warningMessage = document.getElementById("removeChannelMessage");
+                    warningMessage.innerHTML = warning;
+                }
+                catch
+                        (err) {
+                    console.log(err.message);
+                    return;
+                }
+            }
+        }
+    }
+    function addChannel() {
+        var channelUrl = document.getElementById("inputAddChannel").value;
+        var body = 'channelUrl=' + encodeURIComponent(channelUrl);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send(body);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                window.location = "/";
+            } else if (xhr.readyState == 4 && xhr.status == 400) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    var warning = "";
+                    for (var key in data) {
+                        warning += data[key];
+                    }
+                    var warningMessage = document.getElementById("addChannelMessage");
+                    warningMessage.innerHTML = warning;
+                }
+                catch
+                        (err) {
+                    console.log(err.message);
+                    return;
+                }
+            }
+        }
     }
 </script>
 </body>
