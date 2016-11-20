@@ -11,3 +11,4 @@
 * В браузере перейти по адресу *http://localhost/*
 
 ### Спасибо за внимание
+![alt tag](https://raw.githubusercontent.com/AlexKhram/rssreader/master/printscreen.jpg)
